@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 function AddMaintenanceForm({ darkMode, onRecordAdded }) {
   const [formData, setFormData] = useState({
+    customerName: '',
     carRegistrationNumber: '',
     ownerWhatsAppNumber: '',
     lastServiceDate: '',
@@ -45,6 +46,7 @@ function AddMaintenanceForm({ darkMode, onRecordAdded }) {
         setSuccess('Maintenance record created successfully!');
         // Reset form
         setFormData({
+          customerName: '',
           carRegistrationNumber: '',
           ownerWhatsAppNumber: '',
           lastServiceDate: '',
@@ -96,6 +98,32 @@ function AddMaintenanceForm({ darkMode, onRecordAdded }) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Customer Name */}
+        <div>
+          <label
+            htmlFor="customerName"
+            className={`block text-sm font-medium mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            Customer Name
+          </label>
+          <input
+            type="text"
+            id="customerName"
+            name="customerName"
+            value={formData.customerName}
+            onChange={handleChange}
+            required
+            placeholder="e.g., John Doe"
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+              darkMode 
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                : 'bg-white border-gray-300 text-gray-900'
+            }`}
+          />
+        </div>
+
         {/* Car Registration Number */}
         <div>
           <label

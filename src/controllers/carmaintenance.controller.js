@@ -10,6 +10,7 @@ import { sendMaintenanceReminder } from "../services/whatsapp.services.js";
  */
 const createMaintenanceRecord = asyncHandler(async (req, res) => {
   const {
+    customerName,
     carRegistrationNumber,
     ownerWhatsAppNumber,
     lastServiceDate,
@@ -19,6 +20,7 @@ const createMaintenanceRecord = asyncHandler(async (req, res) => {
 
   // Validate required fields
   if (
+    !customerName ||
     !carRegistrationNumber ||
     !ownerWhatsAppNumber ||
     !lastServiceDate ||
@@ -35,6 +37,7 @@ const createMaintenanceRecord = asyncHandler(async (req, res) => {
 
   // Create maintenance record
   const maintenanceRecord = await CarMaintenance.create({
+    customerName,
     carRegistrationNumber: carRegistrationNumber.toUpperCase(),
     ownerWhatsAppNumber,
     lastServiceDate: lastService,

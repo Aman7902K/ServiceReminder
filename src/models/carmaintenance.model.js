@@ -2,6 +2,11 @@ import mongoose, { Schema } from "mongoose";
 
 const carMaintenanceSchema = new Schema(
   {
+    customerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     carRegistrationNumber: {
       type: String,
       required: true,
