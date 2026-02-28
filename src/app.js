@@ -6,28 +6,15 @@ import carMaintenanceRouter from "./routes/carmaintenance.routes.js";
 
 const app = express();
 
-// CORS configuration for development and production
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.FRONTEND_URL // Production frontend URL
-].filter(Boolean);
+// CORS configuration - Allow all origins in production for now
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Frontend URL from env:', process.env.FRONTEND_URL);
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      // Log the origin that's being blocked for debugging
-      console.log('CORS blocked origin:', origin);
-      console.log('Allowed origins:', allowedOrigins);
-      callback(null, true); // Temporarily allow all for debugging
-    }
-  },
-  credentials: true
+  origin: '*', // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: "16kb" }));
