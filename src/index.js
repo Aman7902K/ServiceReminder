@@ -1,10 +1,13 @@
 import dotenv from "dotenv"
+
+// Load environment variables FIRST before any other imports
+dotenv.config({
+    path: './.env'
+})
+
 import connectDB from "./db/index.js"
 import {app} from "./app.js"
 import { initCronJobs } from "./services/cron.services.js"
-
-
-dotenv.config()
 
 connectDB().then(() => {
     app.listen(process.env.PORT || 8000, () => {

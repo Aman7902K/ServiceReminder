@@ -1,78 +1,105 @@
-import twilio from 'twilio';
+import axios from 'axios';
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID
-const authToken = process.env.TWILIO_AUTH_TOKEN 
-const client = twilio(accountSid, authToken);
-
+// Get API URL with phone number ID
+const getWhatsAppApiUrl = () => {
+  const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
+  return `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`;
+};
 
 // Send opt-in welcome message
 export const sendOptInMessage = async (phoneNumber, carNumber) => {
   try {
-    const message = await client.messages.create({
-      body: `Welcome! Thank you for registering your vehicle ${carNumber}. You will receive maintenance reminders for this vehicle.`,
-      from: 'whatsapp:+14155238886',
-      to: `whatsapp:+${phoneNumber}`
+    const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
+    const WHATSAPP_API_URL = getWhatsAppApiUrl();
+    
+    const payload = {
+      messaging_product: "whatsapp",
+      to: phoneNumber,
+      type: "template",
+      template: {
+        name: "hello_world",
+        language: {
+          code: "en_US"
+        }
+      }
+    };
+
+    const response = await axios.post(WHATSAPP_API_URL, payload, {
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
     });
 
-    
-
-    console.log(`✅ Opt-in message sent successfully! SID: ${message.sid}`);
+    console.log(`✅ Opt-in message sent successfully! Message ID: ${response.data.messages[0].id}`);
 
     return {
       success: true,
       data: {
-        sid: message.sid,
-        status: message.status,
+        messageId: response.data.messages[0].id,
         to: phoneNumber,
       },
     };
   } catch (error) {
-    console.error("Twilio Opt-in Message Error:", error.message);
+    console.error("WhatsApp Cloud API Opt-in Message Error:", error.response?.data || error.message);
     return {
       success: false,
-      error: error.message,
+      error: error.response?.data?.error?.message || error.message,
     };
   }
 };
 
 // Send maintenance reminder using template
 export const sendWhatsAppMessage = async (phoneNumber, templateName, parameters) => {
-  // Send actual WhatsApp message using Twilio Content Template
   try {
-    // Create content variables JSON with car number and date
-    const contentVariables = JSON.stringify({
-      "1": parameters[0], // Car registration number
-      "2": parameters[1]  // Service date
-    });
+    const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
+    const WHATSAPP_API_URL = getWhatsAppApiUrl();
     
-    const message = await client.messages.create({
-      from: 'whatsapp:+14155238886',
-      contentSid: 'HXb5b62575e6e4ff6129ad7c8efe1f983e',
-      contentVariables: contentVariables,
-      to: `whatsapp:+${phoneNumber}`
+    const payload = {
+      messaging_product: "whatsapp",
+      to: phoneNumber,
+      type: "template",
+      template: {
+        name: templateName,
+        language: {
+          code: "en"
+        },
+        components: [
+          {
+            type: "body",
+            parameters: parameters.map(param => ({
+              type: "text",
+              text: param
+            }))
+          }
+        ]
+      }
+    };
+
+    const response = await axios.post(WHATSAPP_API_URL, payload, {
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
     });
 
-    console.log(`✅ WhatsApp message sent successfully! SID: ${message.sid}`);
+    console.log(`✅ WhatsApp message sent successfully! Message ID: ${response.data.messages[0].id}`);
 
     return {
       success: true,
-      mock: false,
       data: {
-        sid: message.sid,
-        status: message.status,
+        messageId: response.data.messages[0].id,
         to: phoneNumber,
       },
     };
   } catch (error) {
-    console.error("Twilio WhatsApp API Error:", error.message);
+    console.error("WhatsApp Cloud API Error:", error.response?.data || error.message);
     return {
       success: false,
-      mock: false,
-      error: error.message,
+      error: error.response?.data?.error?.message || error.message,
     };
   }
 };
-
 
 export const sendMaintenanceReminder = async (maintenanceRecord) => {
   const { ownerWhatsAppNumber, carRegistrationNumber, nextServiceDate } = maintenanceRecord;
@@ -80,12 +107,12 @@ export const sendMaintenanceReminder = async (maintenanceRecord) => {
   // Format date for display
   const formattedDate = new Date(nextServiceDate).toLocaleDateString("en-GB");
   
-  // Template parameters: Car Number, Service Date
-  const parameters = [carRegistrationNumber, formattedDate];
+  // Using hello_world template (no parameters needed for standard hello_world)
+  const parameters = [];
   
   return await sendWhatsAppMessage(
     ownerWhatsAppNumber,
-    "maintenance_reminder",
+    "hello_world",
     parameters
   );
 };

@@ -28,10 +28,10 @@ const createMaintenanceRecord = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  // Calculate next service date (90 days from last service date)
+  // Calculate next service date (1 minute from last service date - FOR TESTING)
   const lastService = new Date(lastServiceDate);
   const nextService = new Date(lastService);
-  nextService.setDate(nextService.getDate() + 90);
+  nextService.setMinutes(nextService.getMinutes() + 1);
 
   // Create maintenance record
   const maintenanceRecord = await CarMaintenance.create({
