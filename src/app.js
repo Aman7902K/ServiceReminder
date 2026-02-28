@@ -6,12 +6,29 @@ import carMaintenanceRouter from "./routes/carmaintenance.routes.js";
 
 const app = express();
 
-// CORS configuration - Allow all origins in production for now
+// CORS configuration - specific origins with credentials
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://service-reminder-zeta.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 console.log('Environment:', process.env.NODE_ENV);
-console.log('Frontend URL from env:', process.env.FRONTEND_URL);
+console.log('Allowed origins:', allowedOrigins);
 
 app.use(cors({
-  origin: '*', // Allow all origins
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('Blocked origin:', origin);
+      callback(null, false);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
