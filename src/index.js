@@ -1,17 +1,21 @@
 import dotenv from "dotenv"
 
 // Load environment variables FIRST before any other imports
-dotenv.config({
-    path: './.env'
-})
+// Railway provides env vars automatically, but load .env for local dev
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config({
+        path: './.env'
+    })
+}
 
 import connectDB from "./db/index.js"
 import {app} from "./app.js"
 import { initCronJobs } from "./services/cron.services.js"
 
 connectDB().then(() => {
-    app.listen(process.env.PORT || 8000, () => {
-        console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
+    const PORT = process.env.PORT || 8000;
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`⚙️ Server is running at port : ${PORT}`);
         // Initialize cron jobs after server starts
         initCronJobs();
     })
